@@ -20,8 +20,13 @@ RUN . /clone.sh BLIP https://github.com/salesforce/BLIP.git 48211a1594f1321b00f1
     . /clone.sh clip-interrogator https://github.com/pharmapsychotic/clip-interrogator 2486589f24165c8e3b303f84e9dbbea318df83e8 && \
     . /clone.sh generative-models https://github.com/Stability-AI/generative-models 45c443b316737a4ab6e40413d7794a7f5657c19f
 
-RUN apk add --no-cache wget && \
-    wget -q --output-document="/model.safetensors" "https://civitai.com/api/download/models/164324?type=Model&format=SafeTensor&size=pruned&fp=fp16"
+RUN apk add --no-cache wget
+
+# Download model
+RUN wget -q --output-document="/model.safetensors" "https://civitai.com/api/download/models/164324?type=Model&format=SafeTensor&size=pruned&fp=fp16"
+
+# Download VAE
+RUN wget -q --output-document="/vae.safetensors" "https://huggingface.co/stabilityai/sd-vae-ft-mse-original/resolve/main/vae-ft-mse-840000-ema-pruned.safetensors?download=true"
 
 
 
@@ -59,6 +64,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 COPY --from=download /repositories/ ${ROOT}/repositories/
 COPY --from=download /model.safetensors /model.safetensors
+COPY --from=download /vae.safetensors /vae.safetensors
 RUN mkdir ${ROOT}/interrogate && cp ${ROOT}/repositories/clip-interrogator/data/* ${ROOT}/interrogate
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install -r ${ROOT}/repositories/CodeFormer/requirements.txt
@@ -73,7 +79,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 ADD src .
 
 COPY builder/cache.py /stable-diffusion-webui/cache.py
-RUN cd /stable-diffusion-webui && python cache.py --use-cpu=all --ckpt /model.safetensors --skip-torch-cuda-test --no-half
+RUN cd /stable-diffusion-webui && python cache.py --use-cpu=all --ckpt /model.safetensors --vae-path /vae.safetensors --skip-torch-cuda-test --no-half
 
 # Cleanup section (Worker Template)
 RUN apt-get autoremove -y && \
