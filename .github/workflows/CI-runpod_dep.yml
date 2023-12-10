@@ -11,6 +11,7 @@ on:
 
 jobs:
   check_dep:
+    if: false # Disable this job
     runs-on: ubuntu-latest
     name: Check python requirements file and update
     steps:
