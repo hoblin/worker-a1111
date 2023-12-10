@@ -3,9 +3,6 @@ name: CD | Release Docker Image
 on:
   release:
     types: [published]
-  push:
-    branches:
-      - main
 
 jobs:
   docker:
@@ -35,4 +32,4 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/${{ secrets.DOCKERHUB_IMG }}:${{ github.event.release.tag_name }}
+          tags: ghcr.io/${{ github.repository_owner }}/worker-requiem:${{ github.event.release.tag_name }}
