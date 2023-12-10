@@ -3,6 +3,9 @@ name: CD | Release Docker Image
 on:
   release:
     types: [published]
+  push:
+    branches:
+      - main
 
 jobs:
   docker:
